@@ -41,6 +41,9 @@ final class Controller: ObservableObject {
     private var timer: Timer?
     /// Public IP of the network the manual override was made on.
     private var overrideNetwork: String?
+    /// Exit node state as last seen or set by Exitpilot; a mismatch means the
+    /// user changed it elsewhere (e.g. the Tailscale menu).
+    private var expectedExitNode: String??
 
     init() {
         defaults.register(defaults: [
@@ -79,7 +82,23 @@ final class Controller: ObservableObject {
 
     // MARK: - Actions
 
+    var isConnected: Bool { status?.running ?? false }
+
+    func setConnected(_ connected: Bool) async {
+        do {
+            try await Tailscale.setConnected(connected)
+            expectedExitNode = .none
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
+        }
+        await evaluate()
+    }
+
     func turnOn() async {
+        if !isConnected {
+            await setConnected(true)
+        }
         guard let target = preferredOption ?? status?.options.first else {
             lastError = "No exit node available in your tailnet"
             return
@@ -134,11 +153,21 @@ final class Controller: ObservableObject {
         do {
             let current = try await Tailscale.status()
             status = current
+            if current.running {
+                if let expected = expectedExitNode, expected != current.activeExitNodeIP {
+                    holdManualChoice()
+                }
+                expectedExitNode = current.activeExitNodeIP
+            } else {
+                // Unknown again until Tailscale reconnects.
+                expectedExitNode = .none
+            }
             if preferredExitNode.isEmpty, current.options.count == 1 {
                 preferredExitNode = current.options[0].ip
             }
             guard current.running else {
-                lastError = "Tailscale is not connected"
+                netcheck = nil
+                lastError = nil
                 return
             }
             // netcheck measures the physical network even while an exit node is active.
@@ -165,6 +194,8 @@ final class Controller: ObservableObject {
     private func apply(_ ip: String?, notice: String? = nil) async {
         do {
             try await Tailscale.setExitNode(ip, allowLANAccess: allowLANAccess)
+            // Status can lag behind `tailscale set`, so remember the intent, not the read-back.
+            expectedExitNode = ip
             status = try await Tailscale.status()
             lastError = nil
             if let notice { notify(notice) }

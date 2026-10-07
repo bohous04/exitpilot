@@ -10,7 +10,8 @@ Exitpilot watches for network changes, runs `tailscale netcheck`, and switches f
 
 - Menu bar icon shows the state at a glance: 🌐 off · 🌐🛡 exit node on · ⚠︎ Tailscale not connected
 - Automatic switching: on when the NAT is strict (`MappingVariesByDestIP`) or UDP is blocked, off on open networks
-- Manual on/off; a manual choice is respected until you join a different network
+- Connect / disconnect Tailscale itself from the menu
+- Manual on/off; a manual choice (in Exitpilot or in Tailscale's own menu) is respected until you join a different network
 - Pick which exit node to use from your tailnet
 - Optional LAN access while the exit node is on (printers, local devices)
 - Notifications when it switches, launch at login

@@ -23,6 +23,14 @@ struct MenuContent: View {
     @ObservedObject var controller: Controller
 
     var body: some View {
+        Toggle("Tailscale Connected", isOn: Binding(
+            get: { controller.isConnected },
+            set: { connected in Task { await controller.setConnected(connected) } }
+        ))
+        .disabled(controller.checking || controller.status == nil)
+
+        Divider()
+
         Text(exitNodeLine)
         Text(networkLine)
         if let error = controller.lastError {
@@ -33,6 +41,7 @@ struct MenuContent: View {
 
         if controller.activeExitNode != nil {
             Button("Turn Exit Node Off") { Task { await controller.turnOff() } }
+                .disabled(!controller.isConnected)
         } else {
             Button(turnOnTitle) { Task { await controller.turnOn() } }
                 .disabled(controller.status?.options.isEmpty ?? true)
@@ -78,6 +87,7 @@ struct MenuContent: View {
     }
 
     private var networkLine: String {
+        if !controller.isConnected { return "Network: – (Tailscale off)" }
         guard let check = controller.netcheck else {
             return controller.checking ? "Network: checking…" : "Network: unknown"
         }

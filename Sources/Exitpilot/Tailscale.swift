@@ -82,6 +82,10 @@ enum Tailscale {
         )
     }
 
+    static func setConnected(_ connected: Bool) async throws {
+        _ = try await run([connected ? "up" : "down"])
+    }
+
     static func setExitNode(_ ip: String?, allowLANAccess: Bool) async throws {
         if let ip {
             _ = try await run(["set", "--exit-node=\(ip)", "--exit-node-allow-lan-access=\(allowLANAccess)"])
