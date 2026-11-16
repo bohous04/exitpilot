@@ -105,6 +105,11 @@ enum Tailscale {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: binary)
                 process.arguments = args
+                // The App Store/standalone bundle binary only acts as the CLI when it detects a
+                // terminal; launched from a GUI app it tries to start the GUI and prints plain text.
+                var env = ProcessInfo.processInfo.environment
+                env["TAILSCALE_BE_CLI"] = "1"
+                process.environment = env
                 let stdout = Pipe(), stderr = Pipe()
                 process.standardOutput = stdout
                 process.standardError = stderr
