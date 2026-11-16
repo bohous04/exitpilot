@@ -10,8 +10,9 @@ Exitpilot watches for network changes, runs `tailscale netcheck`, and switches f
 
 - Menu bar icon shows the state at a glance: 🌐 off · 🌐🛡 exit node on · ⚠︎ Tailscale not connected
 - Automatic switching: on when the NAT is strict (`MappingVariesByDestIP`) or UDP is blocked, off on open networks
-- Connect / disconnect Tailscale itself from the menu
-- Manual on/off; a manual choice (in Exitpilot or in Tailscale's own menu) is respected until you join a different network
+- Panel with a colour-coded status card: routing via an exit node, direct connection, restrictive network, or Tailscale off
+- Connect / disconnect Tailscale itself from the panel
+- Manual on/off; a manual choice (in Exitpilot or in Tailscale's own menu) is respected until you join a different network, or until you press **Resume**
 - Pick which exit node to use from your tailnet
 - Optional LAN access while the exit node is on (printers, local devices)
 - Notifications when it switches, launch at login
@@ -30,7 +31,7 @@ Exitpilot watches for network changes, runs `tailscale netcheck`, and switches f
    ```sh
    xattr -dr com.apple.quarantine /Applications/Exitpilot.app
    ```
-3. Click the menu bar icon, choose your **Exit Node**, and turn on **Launch at Login**.
+3. Click the menu bar icon, choose your exit node, and turn on **Launch at login**.
 
 ## Build from source
 

@@ -119,6 +119,13 @@ final class Controller: ObservableObject {
         overrideNetwork = netcheck?.publicIP
     }
 
+    /// Lets automation take over again before the network changes.
+    func resumeAutomation() async {
+        manualOverride = false
+        overrideNetwork = nil
+        await evaluate()
+    }
+
     func selectExitNode(_ ip: String) async {
         preferredExitNode = ip
         if status?.activeExitNodeIP != nil { await apply(ip) }
